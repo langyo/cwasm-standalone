@@ -517,6 +517,8 @@ name = "cwasm-standalone"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
+ "bytes",
  "clap",
  "reqwest",
  "wasmtime",

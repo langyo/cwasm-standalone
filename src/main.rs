@@ -1,3 +1,5 @@
+use stream::{InputStream, OutputStream};
+
 use {
     anyhow::{anyhow, Result},
     clap::Parser,
@@ -13,6 +15,8 @@ use {
         Dir,
     },
 };
+
+mod stream;
 
 fn parse_mapdir(s: &str) -> Result<(String, String)> {
     if let Some((guest_dir, host_dir)) = s.split_once("::") {
@@ -74,7 +78,9 @@ fn main() -> Result<()> {
 
     let mut table = Table::new();
     let mut wasi = WasiCtxBuilder::new();
-    wasi.inherit_stdio();
+    wasi.inherit_stderr();
+    wasi.stdin(InputStream {}, wasmtime_wasi::preview2::IsATTY::No);
+    wasi.stdout(OutputStream {}, wasmtime_wasi::preview2::IsATTY::No);
 
     for (guest_dir, host_dir) in options.mapdir {
         wasi.preopened_dir(
