@@ -1,7 +1,14 @@
 use anyhow::Result;
 use bytes::Bytes;
+use serde::{Deserialize, Serialize};
 
 use wasmtime_wasi::preview2::{HostInputStream, HostOutputStream, OutputStreamError, StreamState};
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Msg {
+    pub id: u32,
+    pub data: String,
+}
 
 pub struct InputStream {}
 
@@ -9,7 +16,13 @@ pub struct InputStream {}
 impl HostInputStream for InputStream {
     fn read(&mut self, size: usize) -> Result<(Bytes, StreamState)> {
         println!("read {} bytes", size);
-        let ret = Bytes::from("233333333\n".as_bytes());
+
+        let ret = Msg {
+            id: 1,
+            data: "hello".to_string(),
+        };
+        let ret = ron::to_string(&ret).unwrap() + "\n";
+        let ret = Bytes::from(ret);
         Ok((ret, StreamState::Open))
     }
 
@@ -23,10 +36,11 @@ pub struct OutputStream {}
 #[async_trait::async_trait]
 impl HostOutputStream for OutputStream {
     fn write(&mut self, bytes: Bytes) -> Result<(), OutputStreamError> {
-        println!(
-            "write {}",
-            String::from_utf8(bytes.to_vec()).map_err(|e| OutputStreamError::Trap(e.into()))?
-        );
+        let msg =
+            String::from_utf8(bytes.to_vec()).map_err(|e| OutputStreamError::Trap(e.into()))?;
+        let msg = ron::from_str::<Msg>(&msg).map_err(|e| OutputStreamError::Trap(e.into()))?;
+
+        println!("{:?}", msg);
         Ok(())
     }
 
