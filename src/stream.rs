@@ -9,7 +9,7 @@ pub struct InputStream {}
 impl HostInputStream for InputStream {
     fn read(&mut self, size: usize) -> Result<(Bytes, StreamState)> {
         println!("read {} bytes", size);
-        let ret = Bytes::from(vec![0; size]);
+        let ret = Bytes::from("233333333\n".as_bytes());
         Ok((ret, StreamState::Open))
     }
 
