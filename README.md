@@ -10,6 +10,6 @@ WebAssembly component compiled to native code) in a Rust program and execute it.
   
 ## Building and running
 
-`cargo run --release`
+`cargo run -- --mapdir /guest::./guest`
 
-You should see "Hello, world!" printed.
+You should see the file's content be printed.
